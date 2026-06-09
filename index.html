@@ -90,6 +90,10 @@
   /* ---- centered content ---- */
   .content{position:relative;z-index:10;text-align:center;padding:24px;
     animation:fadeUp 1s ease both;display:flex;flex-direction:column;align-items:center;gap:18px}
+  .content::before{content:"";position:absolute;inset:-36px -48px;z-index:-1;border-radius:34px;
+    background:radial-gradient(62% 62% at 50% 46%, rgba(7,6,10,.66), rgba(7,6,10,.28) 60%, rgba(7,6,10,0) 80%);
+    opacity:0;transition:opacity 1s ease}
+  body.has-photo .content::before{opacity:1}
   .kicker{font-size:13px;letter-spacing:4px;text-transform:uppercase;color:var(--warm);opacity:.85;font-weight:700}
   h1{font-size:clamp(40px,9vw,92px);line-height:.96;font-weight:800;letter-spacing:1px;
     background:linear-gradient(180deg,#fff7ea,#ffc987 55%,#ff8a1f);-webkit-background-clip:text;background-clip:text;color:transparent;
