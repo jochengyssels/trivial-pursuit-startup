@@ -18,3 +18,5 @@ Open `index.html` in any browser. That's it.
 
 ## Deploy
 Static site, zero config. On Vercel it serves `index.html` automatically.
+
+<!-- deploy test 21:35:14 -->
