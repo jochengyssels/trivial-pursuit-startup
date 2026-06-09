@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Trivial Pursuit of a Startup Idea</title>
+<style>
+  :root{
+    --blue:#1f7ae0; --pink:#e85aa0; --green:#2fab63; --yellow:#f2b705; --brown:#8a5a3c; --orange:#f2792b;
+    --bg:#0e1116; --panel:#171c24; --panel2:#1f2630; --line:#2b3440; --ink:#e9eef5; --muted:#9aa7b6;
+    --good:#2fab63; --bad:#e85a5a;
+    --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    --font: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:radial-gradient(1200px 600px at 50% -10%, #1b2330, #0e1116 60%);color:var(--ink);font-family:var(--font);}
+  a{color:var(--blue)}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 20px 80px;}
+  header.app{display:flex;align-items:center;gap:16px;padding:12px 0 18px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo h1{font-size:18px;margin:0;letter-spacing:.2px}
+  .logo p{margin:0;font-size:12px;color:var(--muted)}
+  .spacer{flex:1}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+  .btn:hover{border-color:#3a4654;transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(180deg,#2b6fe0,#1f5ec2);border-color:#2b6fe0;color:#fff}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:6px 11px;font-size:12px;border-radius:9px}
+  .btn.good{background:linear-gradient(180deg,#34b86c,#249a56);border-color:#2fab63;color:#fff}
+  .btn.bad{background:transparent;border-color:#5a2b2b;color:#ff9d9d}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .pad{padding:22px}
+  .muted{color:var(--muted)}
+  .center{text-align:center}
+  h2{margin:0 0 6px;font-size:24px}
+  h3{margin:0 0 4px;font-size:16px}
+  input,textarea,select{font-family:var(--font);background:#0f141b;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 13px;font-size:14px;width:100%}
+  input:focus,textarea:focus{outline:none;border-color:var(--blue)}
+  textarea{resize:vertical;min-height:64px}
+  label.fld{display:block;font-size:12px;color:var(--muted);margin:0 0 5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:760px){.grid3{grid-template-columns:1fr}}
+
+  /* progress / phases */
+  .phases{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+  .ph{font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:6px 11px;border-radius:999px}
+  .ph.active{background:var(--blue);border-color:var(--blue);color:#fff}
+  .ph.done{border-color:var(--good);color:var(--good)}
+
+  /* timer */
+  .timer{font-variant-numeric:tabular-nums;font-weight:700}
+  .timer.warn{color:var(--yellow)} .timer.over{color:var(--bad)}
+
+  /* die */
+  .die{width:78px;height:78px;border-radius:16px;background:#fff;color:#111;display:grid;place-items:center;font-size:40px;box-shadow:var(--shadow);transition:transform .1s}
+  .die.rolling{animation:shake .4s linear infinite}
+  @keyframes shake{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+
+  /* wedge color chips */
+  .chip{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px}
+  .dotc{width:14px;height:14px;border-radius:50%}
+
+  /* sticky wall */
+  .wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+  .sticky{border-radius:12px;padding:12px 12px 10px;color:#16202b;font-size:14px;line-height:1.35;box-shadow:0 6px 14px rgba(0,0,0,.3);position:relative;min-height:84px;display:flex;flex-direction:column;word-break:break-word}
+  .sticky .meta{margin-top:auto;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;opacity:.8;padding-top:8px}
+  .sticky .x{position:absolute;top:6px;right:8px;cursor:pointer;opacity:.5;font-weight:700}
+  .sticky .x:hover{opacity:1}
+  .votes{display:flex;gap:3px;flex-wrap:wrap}
+  .vdot{width:13px;height:13px;border-radius:50%;background:rgba(0,0,0,.55);cursor:pointer}
+  .sticky.cand{outline:3px solid #fff;outline-offset:2px}
+
+  /* prompt card */
+  .prompt{background:linear-gradient(180deg,#fdfdfd,#eef1f5);color:#1a2330;border-radius:14px;padding:18px 20px;font-size:18px;line-height:1.4;font-weight:600;min-height:90px;display:flex;align-items:center;box-shadow:var(--shadow)}
+
+  /* PIE */
+  .pieWrap{display:flex;gap:30px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .legend{display:flex;flex-direction:column;gap:8px;min-width:230px}
+  .legrow{display:flex;align-items:center;gap:10px;font-size:13px}
+  .legrow .nm{font-weight:700}
+  .legrow.earned .nm{color:#fff}
+  .legrow .st{margin-left:auto;font-size:11px;color:var(--muted)}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#0f141b;border:1px solid var(--line);padding:12px 18px;border-radius:12px;box-shadow:var(--shadow);font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+
+  .tag{font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:var(--muted)}
+  .divider{height:1px;background:var(--line);margin:18px 0}
+  .qmbadge{background:#2a2030;border:1px solid #4a3a52;color:#e9b3ff;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+  .crit{font-size:13px;color:var(--muted);line-height:1.5}
+  .crit b{color:var(--ink)}
+  .failbox{background:#2a1b1b;border:1px solid #5a2b2b;border-radius:10px;padding:12px;font-size:12.5px;color:#ffc4c4;line-height:1.5}
+  .helpbox{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.55}
+  .candlist{display:flex;flex-direction:column;gap:10px}
+  .candcard{display:flex;gap:12px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .candcard .mini{display:flex;gap:4px}
+  .candcard .mini i{width:10px;height:10px;border-radius:50%;display:block}
+  .statement{font-size:20px;line-height:1.7;background:linear-gradient(180deg,#fdfdfd,#eef1f5);color:#1a2330;border-radius:14px;padding:26px 30px}
+  .statement .b{font-weight:800;padding:1px 4px;border-radius:5px}
+  .hidden{display:none !important}
+  .winnerbanner{background:linear-gradient(90deg,rgba(47,171,99,.18),rgba(47,171,99,0));border:1px solid var(--good);border-radius:12px;padding:14px 18px;font-weight:700;color:#bff0d2}
+  @media print{
+    .noprint{display:none !important}
+    html,body{background:#fff;color:#000}
+    .card{box-shadow:none;border:1px solid #ccc}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <div class="logo">
+      <svg width="40" height="40" viewBox="0 0 100 100" id="logoPie"></svg>
+      <div>
+        <h1>The Trivial Pursuit of a Startup Idea</h1>
+        <p>A 90-minute hunt for an AI-first idea · 3 co-founders</p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="pill noprint" id="roundTimerPill" style="display:none">
+      <span>⏱</span><span class="timer" id="phaseTimer">--:--</span>
+      <button class="btn sm ghost" id="timerToggle">Start</button>
+      <button class="btn sm ghost" id="timerReset">↺</button>
+    </div>
+    <button class="btn ghost sm noprint" id="resetAll" title="Wipe everything and start over">Reset session</button>
+  </header>
+
+  <div class="phases noprint" id="phaseBar"></div>
+
+  <main id="app"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const WEDGES = [
+  { key:"market", color:"blue",   hex:"#1f7ae0", emoji:"🔵", original:"Geography",
+    lens:"Market", earn:"A specific, reachable group with money to spend.",
+    example:'Not "SMBs" — "12-person dental practices in the Benelux."',
+    crit:"Name a real, reachable beachhead with a budget. Not “everyone,” not “businesses.”",
+    fail:"The market is “everyone,” or so broad you can’t name 100 reachable customers.",
+    cards:[
+      "Who has this problem so badly they've built a spreadsheet / duct-tape fix for it?",
+      "Whose budget is already being spent here, just inefficiently?",
+      "Which group do WE have unusual access to — through past jobs, networks, or relationships?",
+      "Name the smallest viable beachhead: the 100 customers you could actually reach."
+    ]},
+  { key:"pain", color:"pink", hex:"#e85aa0", emoji:"🩷", original:"Entertainment",
+    lens:"Pain", earn:"A real, frequent, painful problem they endure today.",
+    example:"Something they already hack around or pay to avoid.",
+    crit:"A frequent, painful, hair-on-fire problem they live with today — measurable in hours or money.",
+    fail:"It’s a vitamin, not a painkiller — nice-to-have, not hair-on-fire.",
+    cards:[
+      "What task in this world is tedious, repetitive, and universally hated?",
+      'What do people apologize for being slow at? ("Sorry, still pulling that report…")',
+      "Where does money or time leak today without anyone owning the problem?",
+      'What would make someone say "finally, someone built this"?'
+    ]},
+  { key:"ai", color:"green", hex:"#2fab63", emoji:"🟢", original:"Science & Nature",
+    lens:"AI capability", earn:"Something AI can NOW do here that was impossible/too expensive ~2 years ago.",
+    example:"This is the AI-first test — the Green wedge is the gate.",
+    crit:"Without the AI, the business breaks. AI does something newly reliable, cheap, or instant here.",
+    fail:"The AI is decoration. The idea is ~as good without it → it’s a feature, not the business.",
+    cards:[
+      "What can a model do NOW that it couldn't do reliably 2 years ago — and is that the crux here?",
+      "If this idea works just as well WITHOUT AI, it's not AI-first. What breaks without the AI?",
+      "What was previously gated by needing an expert human, that AI now makes cheap and instant?",
+      "What volume / scale of judgment was impossible to do by hand?"
+    ]},
+  { key:"why", color:"yellow", hex:"#f2b705", emoji:"🟡", original:"History",
+    lens:"Why now", earn:"What changed to open the window.",
+    example:"Model capability, cost curve, regulation, behavior shift, a new API.",
+    crit:"A real change in the last ~18 months — a price, model, law, or habit — that opened the window.",
+    fail:"“Why now” is really “why not earlier” with no actual change.",
+    cards:[
+      "What changed in the last 18 months — a price, a model, a law, a habit?",
+      "Why did this fail before, and what's different today?",
+      "What are people only NOW willing to trust software to do?",
+      "Is there a deadline the world is walking into (regulation, cost pressure)?"
+    ]},
+  { key:"insight", color:"brown", hex:"#8a5a3c", emoji:"🟤", original:"Arts & Literature",
+    lens:"Unfair insight", earn:"What the three of you know or believe that most people don't.",
+    example:'Your "secret." Often born of lived experience.',
+    crit:"A non-obvious belief experts would argue with — and why YOU three specifically can see it.",
+    fail:"The insight is something any consultant would also say.",
+    cards:[
+      "What do the three of us believe about this space that experts would argue with?",
+      "What painful truth did one of us learn the hard way in a past job?",
+      "What does the data / our experience say that the conventional wisdom misses?",
+      "Why are WE, specifically, the right people to see this?"
+    ]},
+  { key:"win", color:"orange", hex:"#f2792b", emoji:"🟠", original:"Sports & Leisure",
+    lens:"The win", earn:"How you get distribution AND stay ahead — the moat.",
+    example:"Why you won't just get copied in a weekend.",
+    crit:"A repeatable distribution channel + a structural advantage that compounds over time.",
+    fail:"“We’ll out-execute them” with no structural advantage.",
+    cards:[
+      "How does the 1,001st customer find us — what's the repeatable distribution channel?",
+      "What gets BETTER as we get bigger (data, network, integrations, workflow lock-in)?",
+      "Why can't a competitor copy this in a weekend?",
+      "What do we own in a year that a newcomer would need years to rebuild?"
+    ]}
+];
+const WK = WEDGES.reduce((m,w)=>(m[w.key]=w,m),{});
+
+// Trivia "answers" for the random-entry jolt + reframing templates
+const TRIVIA = [
+  ["Amazon River","What's the longest, most meandering workflow in our market that nobody has straightened out?"],
+  ["Marie Curie","Where is one expert doing something no one else can — and could AI democratize it?"],
+  ["The Great Wall of China","What barrier in this industry is huge, ancient, and mostly there out of habit?"],
+  ["Photosynthesis","Where could something turn a free, abundant input into value almost automatically?"],
+  ["Mount Everest","What's the single hardest, most prestige-laden task in this field — and who's stuck at base camp?"],
+  ["The printing press","What's still being hand-copied here that could be mass-produced?"],
+  ["Houdini","What do people in this market desperately want to escape from every week?"],
+  ["The Rosetta Stone","Where are two groups unable to understand each other for lack of translation?"],
+  ["Penicillin","What accidental, overlooked thing in this space could quietly cure a big pain?"],
+  ["The stock exchange","Where is there a messy, opaque market that's screaming for a clearinghouse?"],
+  ["Beethoven","Who's producing brilliant work while going 'deaf' to a problem right in front of them?"],
+  ["The assembly line","What artisanal, one-off process here could be standardized into a line?"],
+  ["Pompeii","What in this industry is frozen in time, buried under old assumptions?"],
+  ["The compass","Who is navigating this space blind, with no reliable sense of direction?"],
+  ["Spreadsheets","What critical workflow still lives in a fragile spreadsheet someone's terrified to break?"],
+  ["The lighthouse","Where do customers keep crashing on the same rocks for lack of a warning signal?"]
+];
+
+const PHASES = [
+  {id:"start",   label:"Setup"},
+  {id:"warmup",  label:"Warm-up", min:5},
+  {id:"lap1",    label:"Lap 1 · Diverge", min:40},
+  {id:"contenders", label:"Pick contenders", min:10},
+  {id:"lap2",    label:"Lap 2 · The pie", min:30},
+  {id:"synthesis", label:"Synthesis", min:10}
+];
+
+/* ============================================================
+   STATE
+============================================================ */
+const LS_KEY = "tp_startup_game_v1";
+const blankState = () => ({
+  phase:"start",
+  founders:[ {name:"",role:"CEO"}, {name:"",role:"CTO"}, {name:"",role:"CCO"} ],
+  qmIndex:0,                 // rotating Question Master
+  warmup:["","",""],
+  // lap1 stickies: {id,wedge,text,author,votes:[founderIdx...]}
+  stickies:[],
+  lap1Cat:0,                 // which wedge category index we're on in lap1
+  lap1Prompt:{},             // wedge.key -> current prompt text
+  candidates:[],             // {id,name,note,stickyIds:[], wedges:{key:{answer,earned}}, gaps:{key:reason}, complete:bool}
+  activeCand:null,           // id being played in lap2
+  lap2Cat:0,
+  lap2Prompt:{}
+});
+let S = load() || blankState();
+function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)); }catch(e){ return null; } }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(S)); }
+const uid = () => Math.random().toString(36).slice(2,9);
+
+/* ============================================================
+   PIE RENDERING
+============================================================ */
+function piePath(cx,cy,r,startDeg,endDeg){
+  const a0=(startDeg-90)*Math.PI/180, a1=(endDeg-90)*Math.PI/180;
+  const x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
+  const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+  const large = (endDeg-startDeg)>180?1:0;
+  return `M${cx},${cy} L${x0},${y0} A${r},${r} 0 ${large} 1 ${x1},${y1} Z`;
+}
+function renderPie(svg, earnedKeys, size=240, interactive=false, onClick=null){
+  const cx=size/2, cy=size/2, r=size/2-4;
+  svg.setAttribute("viewBox",`0 0 ${size} ${size}`);
+  let html="";
+  WEDGES.forEach((w,i)=>{
+    const earned = earnedKeys.includes(w.key);
+    const p = piePath(cx,cy,r,i*60,(i+1)*60);
+    html += `<path d="${p}" fill="${earned?w.hex:'#222b36'}" stroke="#0e1116" stroke-width="2"
+              style="cursor:${interactive?'pointer':'default'};${earned?'':'opacity:.55'}" data-wk="${w.key}"></path>`;
+    // emoji-ish label dot
+    const mid=(i*60+30-90)*Math.PI/180, lr=r*0.62;
+    const lx=cx+lr*Math.cos(mid), ly=cy+lr*Math.sin(mid);
+    html += `<circle cx="${lx}" cy="${ly}" r="${size*0.07}" fill="${earned?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)'}"></circle>`;
+    if(earned) html += `<text x="${lx}" y="${ly+ size*0.025}" text-anchor="middle" font-size="${size*0.07}" font-weight="800" fill="${w.hex}">✓</text>`;
+  });
+  html += `<circle cx="${cx}" cy="${cy}" r="${size*0.10}" fill="#0e1116" stroke="#2b3440" stroke-width="2"></circle>`;
+  svg.innerHTML=html;
+  if(interactive){
+    svg.querySelectorAll("path").forEach(p=>{
+      p.onclick=()=> onClick && onClick(p.getAttribute("data-wk"));
+    });
+  }
+}
+
+/* ============================================================
+   TIMER
+============================================================ */
+let timer={running:false, remaining:0, int:null};
+function setupTimer(minutes){
+  clearInterval(timer.int); timer.running=false; timer.remaining=minutes*60;
+  paintTimer();
+  document.getElementById("roundTimerPill").style.display = minutes? "flex":"none";
+}
+function paintTimer(){
+  const el=document.getElementById("phaseTimer");
+  if(!el) return;
+  const neg = timer.remaining<0;
+  const t=Math.abs(timer.remaining);
+  const m=String(Math.floor(t/60)).padStart(2,"0"), s=String(t%60).padStart(2,"0");
+  el.textContent=(neg?"+":"")+m+":"+s;
+  el.className="timer"+(neg?" over":(timer.remaining<60?" warn":""));
+  const tog=document.getElementById("timerToggle"); if(tog) tog.textContent=timer.running?"Pause":"Start";
+}
+document.getElementById("timerToggle").onclick=()=>{
+  timer.running=!timer.running;
+  if(timer.running){ timer.int=setInterval(()=>{timer.remaining--;paintTimer();if(timer.remaining===0)ding();},1000); }
+  else clearInterval(timer.int);
+  paintTimer();
+};
+document.getElementById("timerReset").onclick=()=>{ const ph=PHASES.find(p=>p.id===S.phase); setupTimer(ph&&ph.min||0); };
+function ding(){ try{ const a=new (window.AudioContext||window.webkitAudioContext)(); const o=a.createOscillator(),g=a.createGain(); o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.value=.12;o.start();setTimeout(()=>{o.frequency.value=660},150);setTimeout(()=>{o.stop();a.close()},420);}catch(e){} }
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastT;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2200); }
+
+/* ============================================================
+   NAV
+============================================================ */
+function go(phase){
+  S.phase=phase; save();
+  const ph=PHASES.find(p=>p.id===phase);
+  setupTimer(ph&&ph.min||0);
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function founderName(i){ return S.founders[i].name || ("Founder "+(i+1)); }
+function qmName(){ return founderName(S.qmIndex); }
+function rotateQM(){ S.qmIndex=(S.qmIndex+1)%3; save(); }
+
+/* ============================================================
+   RENDER ROOT
+============================================================ */
+function render(){
+  renderPie(document.getElementById("logoPie"), earnedKeysOfActive(), 40);
+  renderPhaseBar();
+  const app=document.getElementById("app");
+  app.innerHTML="";
+  ({start:renderStart, warmup:renderWarmup, lap1:renderLap1, contenders:renderContenders, lap2:renderLap2, synthesis:renderSynthesis}[S.phase])(app);
+}
+function earnedKeysOfActive(){
+  const c=S.candidates.find(c=>c.id===S.activeCand);
+  if(!c) return [];
+  return WEDGES.filter(w=>c.wedges[w.key]&&c.wedges[w.key].earned).map(w=>w.key);
+}
+function renderPhaseBar(){
+  const bar=document.getElementById("phaseBar");
+  const idx=PHASES.findIndex(p=>p.id===S.phase);
+  bar.innerHTML=PHASES.map((p,i)=>`<span class="ph ${i===idx?'active':''} ${i<idx?'done':''}">${i+1}. ${p.label}${p.min?` · ${p.min}m`:''}</span>`).join("");
+}
+
+/* ---------- helper builders ---------- */
+function el(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstChild; }
+function chip(wkey){ const w=WK[wkey]; return `<span class="chip"><span class="dotc" style="background:${w.hex}"></span>${w.emoji} ${w.lens}</span>`; }
+
+/* ============================================================
+   1. START
+============================================================ */
+function renderStart(app){
+  const c=el(`<section class="card pad"></section>`);
+  c.innerHTML=`
+    <h2>Set up your table</h2>
+    <p class="muted">Three complementary minds. Name each founder and confirm their seat. The <b>Question Master</b> rotates every category — the app tracks it for you.</p>
+    <div class="divider"></div>
+    <div class="grid3" id="founderInputs"></div>
+    <div class="divider"></div>
+    <div class="helpbox">
+      <b>How it plays.</b> Lap 1 you scatter problems across all six wedges (diverge). You then dot-vote and pick 2–3 candidate ideas. Lap 2 you take ONE idea and try to earn all six wedges for it. The first idea to <b>complete the pie</b> is your lead candidate. An incomplete pie isn't failure — it's the session working.
+    </div>
+    <div class="row" style="margin-top:18px;justify-content:flex-end">
+      <button class="btn primary" id="toWarm">Begin warm-up →</button>
+    </div>`;
+  const fi=c.querySelector("#founderInputs");
+  S.founders.forEach((f,i)=>{
+    const box=el(`<div></div>`);
+    box.innerHTML=`
+      <label class="fld">Founder ${i+1}</label>
+      <input placeholder="Name" value="${escapeHtml(f.name)}" data-i="${i}" class="fname"/>
+      <div style="height:8px"></div>
+      <select data-i="${i}" class="frole">
+        ${["CEO","CTO","CCO"].map(r=>`<option ${f.role===r?'selected':''}>${r}</option>`).join("")}
+      </select>`;
+    fi.appendChild(box);
+  });
+  c.querySelectorAll(".fname").forEach(inp=>inp.oninput=e=>{S.founders[+e.target.dataset.i].name=e.target.value;save();renderPhaseBar();});
+  c.querySelectorAll(".frole").forEach(sel=>sel.onchange=e=>{S.founders[+e.target.dataset.i].role=e.target.value;save();});
+  c.querySelector("#toWarm").onclick=()=>go("warmup");
+  app.appendChild(c);
+}
+
+/* ============================================================
+   2. WARM-UP
+============================================================ */
+function renderWarmup(app){
+  const c=el(`<section class="card pad"></section>`);
+  c.innerHTML=`
+    <h2>Warm-up · 5 min</h2>
+    <p class="muted">Each founder names one industry they've worked in, lived near, or are quietly obsessed with. No filtering, no judging. This seeds the wall.</p>
+    <div class="divider"></div>
+    <div class="grid3" id="warmIn"></div>
+    <div class="row" style="margin-top:18px;justify-content:space-between">
+      <button class="btn ghost" id="back">← Setup</button>
+      <button class="btn primary" id="toLap1">Start Lap 1 — Diverge →</button>
+    </div>`;
+  const wi=c.querySelector("#warmIn");
+  S.founders.forEach((f,i)=>{
+    const box=el(`<div></div>`);
+    box.innerHTML=`<label class="fld">${escapeHtml(founderName(i))} · ${f.role}</label>
+      <textarea data-i="${i}" placeholder="An industry I'm obsessed with…">${escapeHtml(S.warmup[i]||"")}</textarea>`;
+    wi.appendChild(box);
+  });
+  c.querySelectorAll("textarea").forEach(t=>t.oninput=e=>{S.warmup[+e.target.dataset.i]=e.target.value;save();});
+  c.querySelector("#back").onclick=()=>go("start");
+  c.querySelector("#toLap1").onclick=()=>{seedWarmupToWall();go("lap1");};
+  app.appendChild(c);
+}
+function seedWarmupToWall(){
+  // optionally seed market stickies from warmup industries (only once)
+  if(S._seeded) return;
+  S.warmup.forEach((w,i)=>{ if(w.trim()) S.stickies.push({id:uid(),wedge:"market",text:"Industry: "+w.trim(),author:i,votes:[]}); });
+  S._seeded=true; save();
+}
+
+/* ============================================================
+   3. LAP 1 — DIVERGE
+============================================================ */
+let dieRolling=false;
+function renderLap1(app){
+  const w=WEDGES[S.lap1Cat];
+  if(!S.lap1Prompt[w.key]) S.lap1Prompt[w.key]=randCard(w);
+  const c=el(`<section></section>`);
+
+  // top control card
+  const top=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
+  top.innerHTML=`
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <span class="tag">Lap 1 · breadth, not a single idea — resist convergence</span>
+        <h2 style="margin-top:6px">${w.emoji} ${w.lens} <span class="muted" style="font-weight:400;font-size:15px">(${w.original})</span></h2>
+        <p class="crit"><b>Earn it later by:</b> ${escapeHtml(w.earn)} <span class="muted">${escapeHtml(w.example)}</span></p>
+      </div>
+      <div class="center">
+        <div class="die" id="die">${dieFace(S.lap1Cat+1)}</div>
+        <button class="btn sm ghost noprint" id="roll" style="margin-top:8px">🎲 Roll for next color</button>
+      </div>
+    </div>
+    <div class="prompt" id="promptCard">${escapeHtml(S.lap1Prompt[w.key])}</div>
+    <div class="row noprint" style="margin-top:12px">
+      <button class="btn sm ghost" id="drawCard">↻ Draw another prompt</button>
+      <button class="btn sm ghost" id="jolt">🃏 Trivia jolt (stuck?)</button>
+      <div class="spacer"></div>
+      <span class="muted" style="font-size:12px;align-self:center">QM: <span class="qmbadge">${escapeHtml(qmName())}</span></span>
+    </div>
+    <div id="joltBox"></div>
+    <div class="divider"></div>
+    <div class="row">
+      <input id="newSticky" placeholder="Add a ${w.lens.toLowerCase()} idea on a ${w.color} sticky… (Enter)"/>
+      <select id="newAuthor" style="max-width:160px">${S.founders.map((f,i)=>`<option value="${i}">${escapeHtml(founderName(i))}</option>`).join("")}</select>
+      <button class="btn primary" id="addSticky">Add</button>
+    </div>`;
+  c.appendChild(top);
+
+  // category nav
+  const nav=el(`<div class="row noprint" style="margin-bottom:14px;gap:8px;flex-wrap:wrap"></div>`);
+  WEDGES.forEach((ww,i)=>{
+    const n=S.stickies.filter(s=>s.wedge===ww.key).length;
+    const b=el(`<button class="btn sm ${i===S.lap1Cat?'primary':'ghost'}">${ww.emoji} ${ww.lens} <span class="muted">${n}</span></button>`);
+    b.onclick=()=>{S.lap1Cat=i;save();render();};
+    nav.appendChild(b);
+  });
+  c.appendChild(nav);
+
+  // wall for this category
+  const wallCard=el(`<div class="card pad"></div>`);
+  wallCard.innerHTML=`<h3 style="margin-bottom:12px">${chip(w.key)} wall — ${S.stickies.filter(s=>s.wedge===w.key).length} ideas</h3><div class="wall" id="wall"></div>`;
+  c.appendChild(wallCard);
+  paintWall(wallCard.querySelector("#wall"), w.key, false);
+
+  // footer nav
+  const foot=el(`<div class="row" style="margin-top:18px;justify-content:space-between"></div>`);
+  foot.innerHTML=`<button class="btn ghost" id="back">← Warm-up</button>
+    <div class="row">
+      ${S.lap1Cat<5?`<button class="btn" id="next">Next category →</button>`:''}
+      <button class="btn primary" id="toContenders">Done diverging — pick contenders →</button>
+    </div>`;
+  c.appendChild(foot);
+
+  // wire
+  const promptEl=top.querySelector("#promptCard");
+  top.querySelector("#drawCard").onclick=()=>{S.lap1Prompt[w.key]=randCard(w);save();promptEl.textContent=S.lap1Prompt[w.key];};
+  top.querySelector("#jolt").onclick=()=>{ const [a,q]=TRIVIA[Math.floor(Math.random()*TRIVIA.length)];
+    top.querySelector("#joltBox").innerHTML=`<div class="helpbox" style="margin-top:10px">🃏 Card answer: <b>${a}</b><br>↳ Force a connection: <i>${escapeHtml(q)}</i></div>`; };
+  top.querySelector("#roll").onclick=()=>rollDie(top.querySelector("#die"));
+  const addS=()=>{ const inp=top.querySelector("#newSticky"); const v=inp.value.trim(); if(!v)return;
+    S.stickies.push({id:uid(),wedge:w.key,text:v,author:+top.querySelector("#newAuthor").value,votes:[]}); save(); inp.value=""; render(); top.querySelector("#newSticky")?.focus(); };
+  top.querySelector("#addSticky").onclick=addS;
+  top.querySelector("#newSticky").addEventListener("keydown",e=>{if(e.key==="Enter")addS();});
+  foot.querySelector("#back").onclick=()=>go("warmup");
+  if(foot.querySelector("#next")) foot.querySelector("#next").onclick=()=>{S.lap1Cat++;save();rotateQM();render();window.scrollTo({top:0,behavior:'smooth'});};
+  foot.querySelector("#toContenders").onclick=()=>{
+    if(S.stickies.length<4){toast("Scatter a few more ideas across the wall first.");return;}
+    go("contenders");
+  };
+  app.appendChild(c);
+}
+function randCard(w){ return w.cards[Math.floor(Math.random()*w.cards.length)]; }
+function dieFace(n){ return ["","⚀","⚁","⚂","⚃","⚄","⚅"][n]; }
+function rollDie(dieEl){
+  if(dieRolling) return; dieRolling=true; dieEl.classList.add("rolling");
+  let ticks=0; const iv=setInterval(()=>{ dieEl.textContent=dieFace(1+Math.floor(Math.random()*6)); if(++ticks>10){clearInterval(iv);
+    const n=1+Math.floor(Math.random()*6); dieEl.textContent=dieFace(n); dieEl.classList.remove("rolling"); dieRolling=false;
+    S.lap1Cat=n-1; save(); rotateQM(); setTimeout(()=>{render();toast("Rolled "+n+" → "+WEDGES[n-1].lens);},250); } },70);
+}
+function paintWall(wallEl, wkey, votingMode){
+  const w=WK[wkey];
+  const list=S.stickies.filter(s=>s.wedge===wkey);
+  wallEl.innerHTML = list.length? "" : `<p class="muted">No ${w.lens.toLowerCase()} ideas yet.</p>`;
+  list.forEach(s=>{
+    const card=el(`<div class="sticky ${isCandSticky(s.id)?'cand':''}" style="background:${tint(w.hex)}"></div>`);
+    card.innerHTML=`
+      <span class="x" title="remove">✕</span>
+      <div>${escapeHtml(s.text)}</div>
+      <div class="meta">
+        <span>${escapeHtml(founderName(s.author))}</span>
+        <span class="votes">${s.votes.map(()=>`<span class="vdot" title="vote"></span>`).join("")}</span>
+      </div>`;
+    card.querySelector(".x").onclick=()=>{S.stickies=S.stickies.filter(x=>x.id!==s.id);save();render();};
+    if(votingMode){
+      card.style.cursor="pointer";
+      card.title="Click to add a dot · shift-click to remove";
+      card.onclick=(e)=>{ if(e.target.classList.contains("x"))return;
+        if(e.shiftKey){ s.votes.pop(); } else { s.votes.push(1); }
+        save(); render(); };
+    }
+    wallEl.appendChild(card);
+  });
+}
+function isCandSticky(id){ return S.candidates.some(c=>c.stickyIds.includes(id)); }
+function tint(hex){ // light sticky tint from wedge hex
+  const m={ "#1f7ae0":"#cfe4ff","#e85aa0":"#ffd4ea","#2fab63":"#cdf0d9","#f2b705":"#ffeeb0","#8a5a3c":"#e8d2c2","#f2792b":"#ffd9bf"};
+  return m[hex]||"#eee";
+}
+
+/* ============================================================
+   4. PICK CONTENDERS
+============================================================ */
+function renderContenders(app){
+  const c=el(`<section></section>`);
+  const top=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
+  top.innerHTML=`
+    <h2>Pick contenders · 10 min</h2>
+    <p class="muted">Cluster the wall. Each founder silently places dots on the 2–3 stickies that genuinely excite them. Look for natural pairings — usually a <b>Pain + Market</b> that fit. Then name your top 2–3 candidate ideas to take into Lap 2.</p>
+    <div class="helpbox" style="margin-top:10px">👉 <b>Vote:</b> click any sticky to add a dot, shift-click to remove. Dots are anonymous and just help you see what's hot.</div>`;
+  c.appendChild(top);
+
+  // voting wall, all categories grouped
+  WEDGES.forEach(w=>{
+    if(!S.stickies.some(s=>s.wedge===w.key)) return;
+    const card=el(`<div class="card pad" style="margin-bottom:12px"></div>`);
+    card.innerHTML=`<h3 style="margin-bottom:10px">${chip(w.key)}</h3><div class="wall"></div>`;
+    c.appendChild(card);
+    paintWall(card.querySelector(".wall"), w.key, true);
+  });
+
+  // candidate builder
+  const cb=el(`<div class="card pad" style="margin-top:16px"></div>`);
+  cb.innerHTML=`
+    <h3>Candidate ideas <span class="muted">(${S.candidates.length})</span></h3>
+    <p class="muted" style="font-size:13px">Name an idea, then tap the stickies that belong to it (usually one Pain + one Market). Aim for 2–3.</p>
+    <div class="row" style="margin:10px 0">
+      <input id="candName" placeholder="Candidate idea name, e.g. 'Auto insurance-claim reconciler for dental practices'"/>
+      <button class="btn primary" id="addCand">+ Add candidate</button>
+    </div>
+    <div class="candlist" id="candList"></div>`;
+  c.appendChild(cb);
+  paintCandidateList(cb.querySelector("#candList"), true);
+  cb.querySelector("#addCand").onclick=()=>{ const i=cb.querySelector("#candName"); const v=i.value.trim(); if(!v)return;
+    S.candidates.push({id:uid(),name:v,note:"",stickyIds:[],wedges:{},gaps:{},complete:false}); save(); i.value=""; render(); };
+
+  const foot=el(`<div class="row" style="margin-top:18px;justify-content:space-between"></div>`);
+  foot.innerHTML=`<button class="btn ghost" id="back">← Back to Lap 1</button>
+    <button class="btn primary" id="toLap2" ${S.candidates.length?'':'disabled'}>Play for the pie — Lap 2 →</button>`;
+  c.appendChild(foot);
+  foot.querySelector("#back").onclick=()=>go("lap1");
+  foot.querySelector("#toLap2").onclick=()=>{ if(!S.candidates.length){toast("Add at least one candidate idea.");return;} go("lap2"); };
+  app.appendChild(c);
+}
+function paintCandidateList(elc, editable){
+  elc.innerHTML = S.candidates.length? "" : `<p class="muted">No candidates yet.</p>`;
+  S.candidates.forEach(cd=>{
+    const earned = WEDGES.filter(w=>cd.wedges[w.key]&&cd.wedges[w.key].earned).map(w=>w.key);
+    const card=el(`<div class="candcard"></div>`);
+    card.innerHTML=`
+      <div class="mini">${WEDGES.map(w=>`<i style="background:${earned.includes(w.key)?w.hex:'#39434f'}"></i>`).join("")}</div>
+      <div style="flex:1">
+        <div style="font-weight:700">${escapeHtml(cd.name)} ${cd.complete?'<span class="qmbadge" style="background:#16301f;border-color:#2fab63;color:#bff0d2">PIE COMPLETE 🥧</span>':''}</div>
+        <div class="muted" style="font-size:12px">${cd.stickyIds.length} stickies · ${earned.length}/6 wedges</div>
+      </div>
+      ${editable?`<button class="btn sm bad" data-del="${cd.id}">remove</button>`:''}`;
+    elc.appendChild(card);
+    if(editable){
+      // sticky picker
+      const picker=el(`<div style="margin:-4px 0 6px 0"></div>`);
+      const stickyChips = S.stickies.map(s=>{
+        const on=cd.stickyIds.includes(s.id);
+        return `<button class="btn sm ${on?'primary':'ghost'}" data-sid="${s.id}" data-cid="${cd.id}" style="margin:3px 4px 0 0;font-size:11px">${WK[s.wedge].emoji} ${escapeHtml(s.text.slice(0,40))}</button>`;
+      }).join("");
+      picker.innerHTML=`<details><summary class="muted" style="cursor:pointer;font-size:12px;margin:4px 0">attach stickies ▾</summary><div style="margin-top:6px">${stickyChips}</div></details>`;
+      elc.appendChild(picker);
+      picker.querySelectorAll("[data-sid]").forEach(b=>b.onclick=()=>{
+        const cid=b.dataset.cid, sid=b.dataset.sid; const cc=S.candidates.find(x=>x.id===cid);
+        if(cc.stickyIds.includes(sid)) cc.stickyIds=cc.stickyIds.filter(x=>x!==sid); else cc.stickyIds.push(sid);
+        save(); render();
+      });
+      card.querySelector("[data-del]").onclick=()=>{ S.candidates=S.candidates.filter(x=>x.id!==cd.id); if(S.activeCand===cd.id)S.activeCand=null; save(); render(); };
+    }
+  });
+}
+
+/* ============================================================
+   5. LAP 2 — PLAY FOR THE PIE
+============================================================ */
+function renderLap2(app){
+  const c=el(`<section></section>`);
+  // candidate selector
+  if(!S.activeCand || !S.candidates.find(x=>x.id===S.activeCand)){
+    const pick=el(`<div class="card pad"></div>`);
+    pick.innerHTML=`<h2>Lap 2 · Play for the pie</h2>
+      <p class="muted">Take <b>ONE</b> candidate. Go wedge by wedge and try to earn all six. The QM (<span class="qmbadge">${escapeHtml(qmName())}</span>) only awards a wedge when <b>all three of you agree</b> the answer is specific and true. Can't fill one? Record the gap, set it aside, start the next candidate.</p>
+      <div class="divider"></div><h3>Choose a candidate to play</h3><div class="candlist" id="cl"></div>
+      <div class="row" style="margin-top:16px;justify-content:space-between">
+        <button class="btn ghost" id="back">← Contenders</button>
+        ${S.candidates.some(c=>c.complete)?`<button class="btn primary" id="toSyn">Go to synthesis →</button>`:''}
+      </div>`;
+    c.appendChild(pick);
+    const cl=pick.querySelector("#cl");
+    S.candidates.forEach(cd=>{
+      const earned=WEDGES.filter(w=>cd.wedges[w.key]&&cd.wedges[w.key].earned).length;
+      const card=el(`<div class="candcard" style="cursor:pointer"></div>`);
+      card.innerHTML=`<div class="mini">${WEDGES.map(w=>`<i style="background:${cd.wedges[w.key]&&cd.wedges[w.key].earned?w.hex:'#39434f'}"></i>`).join("")}</div>
+        <div style="flex:1"><div style="font-weight:700">${escapeHtml(cd.name)} ${cd.complete?'🥧':''}</div>
+        <div class="muted" style="font-size:12px">${earned}/6 wedges earned</div></div>
+        <button class="btn sm primary">Play this →</button>`;
+      card.onclick=()=>{S.activeCand=cd.id;S.lap2Cat=0;save();render();};
+      cl.appendChild(card);
+    });
+    pick.querySelector("#back").onclick=()=>go("contenders");
+    if(pick.querySelector("#toSyn")) pick.querySelector("#toSyn").onclick=()=>go("synthesis");
+    app.appendChild(c); return;
+  }
+
+  const cd=S.candidates.find(x=>x.id===S.activeCand);
+  const w=WEDGES[S.lap2Cat];
+  cd.wedges[w.key]=cd.wedges[w.key]||{answer:"",earned:false};
+  if(!S.lap2Prompt[w.key]) S.lap2Prompt[w.key]=randCard(w);
+  const earnedKeys=earnedKeysOfActive();
+
+  const head=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
+  head.innerHTML=`
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div><span class="tag">Now playing</span><h2 style="margin-top:4px">${escapeHtml(cd.name)}</h2></div>
+      <button class="btn sm ghost noprint" id="switch">↔ Switch candidate</button>
+    </div>`;
+  c.appendChild(head);
+
+  // pie + legend
+  const pieCard=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
+  pieCard.innerHTML=`<div class="pieWrap">
+      <svg id="lap2pie" width="240" height="240"></svg>
+      <div class="legend" id="legend"></div>
+    </div>`;
+  c.appendChild(pieCard);
+  renderPie(pieCard.querySelector("#lap2pie"), earnedKeys, 240, true, (wk)=>{S.lap2Cat=WEDGES.findIndex(x=>x.key===wk);save();render();});
+  const leg=pieCard.querySelector("#legend");
+  leg.innerHTML=WEDGES.map(ww=>{
+    const e=cd.wedges[ww.key]&&cd.wedges[ww.key].earned;
+    const gap=cd.gaps[ww.key];
+    return `<div class="legrow ${e?'earned':''}" data-go="${ww.key}" style="cursor:pointer">
+      <span class="dotc" style="background:${e?ww.hex:'#39434f'}"></span>
+      <span class="nm">${ww.emoji} ${ww.lens}</span>
+      <span class="st">${e?'✓ earned':(gap?'⚠ gap':'—')}</span></div>`;
+  }).join("");
+  leg.querySelectorAll("[data-go]").forEach(r=>r.onclick=()=>{S.lap2Cat=WEDGES.findIndex(x=>x.key===r.dataset.go);save();render();});
+
+  // current wedge work area
+  const work=el(`<div class="card pad"></div>`);
+  const earned=cd.wedges[w.key].earned;
+  work.innerHTML=`
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <h3 style="font-size:20px">${w.emoji} ${w.lens} <span class="muted" style="font-weight:400">— ${escapeHtml(w.earn)}</span></h3>
+        <p class="crit"><b>Award only if:</b> ${escapeHtml(w.crit)}</p>
+      </div>
+      <span class="qmbadge">QM: ${escapeHtml(qmName())}</span>
+    </div>
+    <div class="prompt" id="p2" style="font-size:16px;min-height:64px">${escapeHtml(S.lap2Prompt[w.key])}</div>
+    <div class="row noprint" style="margin:10px 0">
+      <button class="btn sm ghost" id="draw2">↻ Draw another prompt</button>
+      <button class="btn sm ghost" id="jolt2">🃏 Trivia jolt</button>
+    </div>
+    <div id="joltBox2"></div>
+    <label class="fld" style="margin-top:6px">The answer for this idea (be specific — the QM rejects vague)</label>
+    <textarea id="ans" placeholder="${escapeHtml(w.example)}">${escapeHtml(cd.wedges[w.key].answer)}</textarea>
+    <div class="failbox" style="margin-top:10px">🚫 <b>Don't award if:</b> ${escapeHtml(w.fail)}</div>
+    <div class="row" style="margin-top:14px;align-items:center">
+      ${earned
+        ? `<span class="winnerbanner" style="flex:1">✓ Wedge earned. All three agreed it's specific and true.</span>
+           <button class="btn ghost sm" id="unaward">undo</button>`
+        : `<button class="btn good" id="award">✓ All three agree — award wedge</button>
+           <button class="btn bad" id="gap">⚠ Can't fill it — record gap</button>`}
+    </div>
+    <div id="gapBox"></div>`;
+  c.appendChild(work);
+
+  work.querySelector("#ans").oninput=e=>{cd.wedges[w.key].answer=e.target.value;save();};
+  work.querySelector("#draw2").onclick=()=>{S.lap2Prompt[w.key]=randCard(w);save();work.querySelector("#p2").textContent=S.lap2Prompt[w.key];};
+  work.querySelector("#jolt2").onclick=()=>{const [a,q]=TRIVIA[Math.floor(Math.random()*TRIVIA.length)];
+    work.querySelector("#joltBox2").innerHTML=`<div class="helpbox" style="margin-top:10px">🃏 <b>${a}</b> ↳ <i>${escapeHtml(q)}</i></div>`;};
+  if(work.querySelector("#award")) work.querySelector("#award").onclick=()=>{
+    if(!cd.wedges[w.key].answer.trim()){toast("Write the specific answer first.");return;}
+    cd.wedges[w.key].earned=true; delete cd.gaps[w.key]; checkComplete(cd); save();
+    if(cd.complete){ toast("🥧 PIE COMPLETE — "+cd.name); } else { toast(w.lens+" wedge earned"); }
+    advanceLap2(cd);
+  };
+  if(work.querySelector("#unaward")) work.querySelector("#unaward").onclick=()=>{cd.wedges[w.key].earned=false;cd.complete=false;save();render();};
+  if(work.querySelector("#gap")) work.querySelector("#gap").onclick=()=>{
+    work.querySelector("#gapBox").innerHTML=`
+      <div class="helpbox" style="margin-top:12px">
+        <label class="fld">Why couldn't you earn the ${w.lens} wedge? (This is gold — often more useful than the winner.)</label>
+        <textarea id="gapWhy" placeholder="e.g. No real moat — anyone could copy the workflow in a weekend.">${escapeHtml(cd.gaps[w.key]||"")}</textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="saveGap">Save gap & set idea aside</button>
+          <button class="btn ghost" id="cancelGap">cancel</button>
+        </div>
+      </div>`;
+    work.querySelector("#saveGap").onclick=()=>{ cd.gaps[w.key]=work.querySelector("#gapWhy").value.trim()||"(gap)"; cd.wedges[w.key].earned=false; cd.complete=false; save();
+      toast("Gap recorded. Pick another candidate."); S.activeCand=null; save(); render(); };
+    work.querySelector("#cancelGap").onclick=()=>{work.querySelector("#gapBox").innerHTML="";};
+  };
+
+  // wedge nav + footer
+  const nav=el(`<div class="row noprint" style="margin-top:16px;gap:8px;flex-wrap:wrap"></div>`);
+  WEDGES.forEach((ww,i)=>{
+    const e=cd.wedges[ww.key]&&cd.wedges[ww.key].earned;
+    const b=el(`<button class="btn sm ${i===S.lap2Cat?'primary':(e?'good':'ghost')}">${ww.emoji} ${ww.lens}${e?' ✓':''}</button>`);
+    b.onclick=()=>{S.lap2Cat=i;save();render();};
+    nav.appendChild(b);
+  });
+  c.appendChild(nav);
+
+  const foot=el(`<div class="row" style="margin-top:14px;justify-content:space-between"></div>`);
+  foot.innerHTML=`<button class="btn ghost" id="back">← Contenders</button>
+    <div class="row">
+      ${S.lap2Cat<5?`<button class="btn" id="next">Next wedge →</button>`:''}
+      <button class="btn primary ${cd.complete?'':''}" id="toSyn" ${cd.complete?'':'disabled'} title="${cd.complete?'':'Complete the pie first'}">Synthesis →</button>
+    </div>`;
+  c.appendChild(foot);
+  head.querySelector("#switch").onclick=()=>{S.activeCand=null;save();render();};
+  foot.querySelector("#back").onclick=()=>go("contenders");
+  if(foot.querySelector("#next")) foot.querySelector("#next").onclick=()=>{S.lap2Cat++;save();rotateQM();render();window.scrollTo({top:0,behavior:'smooth'});};
+  foot.querySelector("#toSyn").onclick=()=>{ if(cd.complete) go("synthesis"); };
+  app.appendChild(c);
+}
+function checkComplete(cd){ cd.complete=WEDGES.every(w=>cd.wedges[w.key]&&cd.wedges[w.key].earned); }
+function advanceLap2(cd){
+  if(cd.complete){ render(); return; }
+  // jump to next unearned wedge
+  let i=S.lap2Cat;
+  for(let k=1;k<=6;k++){ const ni=(i+k)%6; if(!(cd.wedges[WEDGES[ni].key]&&cd.wedges[WEDGES[ni].key].earned)){ S.lap2Cat=ni; break; } }
+  rotateQM(); save(); render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============================================================
+   6. SYNTHESIS
+============================================================ */
+function renderSynthesis(app){
+  const winners=S.candidates.filter(c=>c.complete);
+  const c=el(`<section></section>`);
+  const top=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
+  top.innerHTML=`<h2>Synthesis · 10 min</h2>
+    <p class="muted">Read the winner statement out loud. If all three of you nod, you have something worth a week of customer conversations.</p>`;
+  c.appendChild(top);
+
+  if(!winners.length){
+    const none=el(`<div class="card pad"></div>`);
+    none.innerHTML=`<div class="winnerbanner" style="border-color:#5a4a2b;background:rgba(242,183,5,.12);color:#ffe8a8">No pie was completed yet — that's the session working, not failing. Review your gaps below, then go back to Lap 2.</div>
+      <div style="margin-top:14px" id="gaps"></div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="back">← Back to Lap 2</button></div>`;
+    c.appendChild(none);
+    none.querySelector("#gaps").innerHTML=renderGaps();
+    none.querySelector("#back").onclick=()=>go("lap2");
+    app.appendChild(c); return;
+  }
+
+  winners.forEach(cd=>{
+    const card=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
+    const g=k=>escapeHtml((cd.wedges[k].answer||"…").trim());
+    card.innerHTML=`
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3 style="font-size:20px">🥧 ${escapeHtml(cd.name)}</h3>
+        <svg width="64" height="64" id="pie_${cd.id}"></svg>
+      </div>
+      <div class="statement" style="margin-top:10px">
+        For <span class="b" style="background:#cfe4ff">${g("market")}</span>,
+        who struggle with <span class="b" style="background:#ffd4ea">${g("pain")}</span>,
+        we use <span class="b" style="background:#cdf0d9">${g("ai")}</span> —
+        newly viable because <span class="b" style="background:#ffeeb0">${g("why")}</span>.
+        Unlike others, we see that <span class="b" style="background:#e8d2c2">${g("insight")}</span>,
+        and we'll win by <span class="b" style="background:#ffd9bf">${g("win")}</span>.
+      </div>`;
+    c.appendChild(card);
+    renderPie(card.querySelector("#pie_"+cd.id), WEDGES.map(w=>w.key), 64);
+  });
+
+  // other candidates' gaps
+  const gapsCard=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
+  gapsCard.innerHTML=`<h3>What the other candidates taught you</h3>${renderGaps()}`;
+  c.appendChild(gapsCard);
+
+  const foot=el(`<div class="row noprint" style="justify-content:space-between"></div>`);
+  foot.innerHTML=`<button class="btn ghost" id="back">← Lap 2</button>
+    <div class="row">
+      <button class="btn" id="print">🖨 Print / Save PDF</button>
+      <button class="btn good" id="restart">Play again (new session)</button>
+    </div>`;
+  c.appendChild(foot);
+  foot.querySelector("#back").onclick=()=>go("lap2");
+  foot.querySelector("#print").onclick=()=>window.print();
+  foot.querySelector("#restart").onclick=()=>{ if(confirm("Start a brand new session? This clears the board.")){ S=blankState(); save(); go("start"); } };
+  app.appendChild(c);
+}
+function renderGaps(){
+  const items=[];
+  S.candidates.forEach(cd=>{
+    Object.keys(cd.gaps||{}).forEach(k=>{ items.push(`<li><b>${escapeHtml(cd.name)}</b> — couldn't earn ${WK[k].emoji} ${WK[k].lens}: <span class="muted">${escapeHtml(cd.gaps[k])}</span></li>`); });
+  });
+  return items.length? `<ul style="line-height:1.7">${items.join("")}</ul>` : `<p class="muted">No gaps recorded.</p>`;
+}
+
+/* ============================================================
+   UTIL
+============================================================ */
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+document.getElementById("resetAll").onclick=()=>{ if(confirm("Reset the whole session? Everything will be cleared.")){ S=blankState(); save(); go("start"); } };
+
+/* boot */
+render();
+</script>
+</body>
+</html>
