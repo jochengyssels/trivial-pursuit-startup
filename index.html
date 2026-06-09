@@ -102,6 +102,19 @@
   .statement .b{font-weight:800;padding:1px 4px;border-radius:5px}
   .hidden{display:none !important}
   .winnerbanner{background:linear-gradient(90deg,rgba(47,171,99,.18),rgba(47,171,99,0));border:1px solid var(--good);border-radius:12px;padding:14px 18px;font-weight:700;color:#bff0d2}
+  /* per-round rules reveal */
+  details.rules{margin:0 0 16px;border:1px solid #34507a;border-radius:12px;background:linear-gradient(180deg,#172234,#141a22);overflow:hidden}
+  details.rules>summary{cursor:pointer;list-style:none;padding:13px 16px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:9px;color:#cfe0f2}
+  details.rules>summary::-webkit-details-marker{display:none}
+  details.rules>summary:hover{background:#1b2940}
+  details.rules>summary::after{content:"Show ▾";margin-left:auto;color:var(--muted);font-size:12px;font-weight:600}
+  details.rules[open]>summary::after{content:"Hide ▴"}
+  details.rules .rbody{padding:6px 18px 16px;font-size:13.5px;line-height:1.65;color:#aeb9c6;border-top:1px solid #2b3a52}
+  details.rules .rbody b{color:var(--ink)}
+  details.rules .rbody i{color:#cfe0f2}
+  details.rules .rbody ul{margin:8px 0;padding-left:20px}
+  details.rules .rbody li{margin:5px 0}
+  details.rules .rbody .warn{color:#ffd28a;font-weight:700}
   @media print{
     .noprint{display:none !important}
     html,body{background:#fff;color:#000}
@@ -208,6 +221,56 @@ const WEDGES = [
     ]}
 ];
 const WK = WEDGES.reduce((m,w)=>(m[w.key]=w,m),{});
+
+// Exact playing rules per round — revealed by a button on each phase screen
+const RULES = {
+  start:`<b>Goal — set the table.</b> Name all three founders and confirm their seats (CEO / CTO / CCO).
+    <br><br><b>The Question Master (QM).</b> One person runs each category. The QM reads the prompt card aloud,
+    <b>refuses vague answers</b>, and calls the vote on whether a wedge is earned. The role <b>rotates every category</b> —
+    the app tracks whose turn it is, so all three of you run it roughly twice across the two laps.
+    <br><br><b>The whole arc.</b> Lap 1 you scatter problems across all six wedges (diverge). You dot-vote and pick 2–3 candidate
+    ideas. Lap 2 you take ONE idea and try to earn all six wedges for it (converge). The first idea to complete the pie is your lead candidate.`,
+  warmup:`<b>Time:</b> 5 minutes.<br><b>Do this:</b> each founder names <b>one industry</b> they've worked in, lived near, or are
+    quietly obsessed with. <b>No filtering, no judging.</b> These seed the wall — they become your first Market stickies. Don't debate
+    them yet; just get them down.`,
+  lap1:`<b>Time:</b> ~40 minutes — roughly 6–7 minutes per category.<br><b>Do this:</b> go category by category, or <b>roll the die</b>
+    to pick the next color (randomness stops you camping in your comfort zone). For each category, draw a prompt card and
+    <b>generate as many candidate answers as you can</b> on that color's stickies. Slap them on the wall.
+    <ul>
+      <li><b>Lap 1 goal is breadth, not a single idea</b> — do NOT try to connect things yet.</li>
+      <li>You want a messy wall: many markets, many pains, many capabilities.</li>
+      <li class="warn">Resist convergence — it kills options early.</li>
+    </ul>
+    <b>Stuck?</b> Hit the Trivia jolt: read a random card answer (ignore the question) and force a connection. Use it as a jolt, not the main engine.`,
+  contenders:`<b>Time:</b> 10 minutes.<br><b>Do this:</b> cluster the wall, then each founder <b>silently</b> places dots on the 2–3
+    stickies that genuinely excite them (click a sticky to add a dot, shift-click to remove). Look for natural pairings — usually a
+    <b>Pain + Market</b> that fit together. Then name your top <b>2–3 candidate ideas</b> to take into Lap 2 and attach the relevant stickies to each.`,
+  lap2:`<b>Time:</b> ~30 minutes.<br><b>Do this:</b> take <b>ONE</b> candidate idea. Go wedge by wedge and try to earn all six wedges
+    <i>for that specific idea</i>.
+    <ul>
+      <li>The QM awards a wedge only when <b>all three of you agree</b> the answer is specific and true.</li>
+      <li>Can't fill a wedge (no real moat, or AI doesn't actually change the game)? The idea is incomplete — <b>record the gap, set it aside, start the next candidate.</b></li>
+      <li>The first idea to complete the pie is your lead candidate.</li>
+    </ul>
+    <b>Two rules that make or break it.</b> (1) <b>Specificity over cleverness</b> — reject “businesses need better data”; demand
+    “a 12-person dental practice loses ~3 hrs/week reconciling claims by hand.” (2) <b>The Green wedge is the gate</b> — if the idea
+    is roughly as good without the AI, the AI is a feature, not the business.
+    <br><br><span class="warn">Don't award a wedge if:</span> the market is “everyone” (🔵) · the pain is a vitamin not a painkiller (🩷) ·
+    the AI is decoration (🟢) · “why now” is really “why not earlier” (🟡) · the insight is something any consultant would say (🟤) ·
+    or the moat is just “we'll out-execute them” (🟠).
+    <br><br>You'll often learn more from <i>why</i> an exciting idea couldn't earn its Green or Orange wedge than from the winner.
+    An incomplete pie isn't a failure — it's the session working.`,
+  synthesis:`<b>Time:</b> 10 minutes.<br><b>Do this:</b> for the idea that completed the pie, read the winner statement out loud,
+    filled in from your six earned wedges:
+    <br><br><i>“For [market], who struggle with [pain], we use [AI capability] — newly viable because [why now]. Unlike others,
+    we see that [insight], and we'll win by [distribution + moat].”</i>
+    <br><br>If you can say that paragraph out loud and <b>all three nod</b>, you have something worth a week of customer conversations.
+    Save/print it — and review what the candidates that <i>didn't</i> complete taught you. Those recorded gaps are often the most useful output.`
+};
+function rulesBlock(id){
+  const r=RULES[id]; if(!r) return "";
+  return `<details class="rules"><summary>📖 Show the exact rules for this round</summary><div class="rbody">${r}</div></details>`;
+}
 
 // Trivia "answers" for the random-entry jolt + reframing templates
 const TRIVIA = [
@@ -372,6 +435,7 @@ function chip(wkey){ const w=WK[wkey]; return `<span class="chip"><span class="d
    1. START
 ============================================================ */
 function renderStart(app){
+  app.appendChild(el(rulesBlock("start")));
   const c=el(`<section class="card pad"></section>`);
   c.innerHTML=`
     <h2>Set up your table</h2>
@@ -407,6 +471,7 @@ function renderStart(app){
    2. WARM-UP
 ============================================================ */
 function renderWarmup(app){
+  app.appendChild(el(rulesBlock("warmup")));
   const c=el(`<section class="card pad"></section>`);
   c.innerHTML=`
     <h2>Warm-up · 5 min</h2>
@@ -441,6 +506,7 @@ function seedWarmupToWall(){
 ============================================================ */
 let dieRolling=false;
 function renderLap1(app){
+  app.appendChild(el(rulesBlock("lap1")));
   const w=WEDGES[S.lap1Cat];
   if(!S.lap1Prompt[w.key]) S.lap1Prompt[w.key]=randCard(w);
   const c=el(`<section></section>`);
@@ -560,6 +626,7 @@ function tint(hex){ // light sticky tint from wedge hex
    4. PICK CONTENDERS
 ============================================================ */
 function renderContenders(app){
+  app.appendChild(el(rulesBlock("contenders")));
   const c=el(`<section></section>`);
   const top=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
   top.innerHTML=`
@@ -636,6 +703,7 @@ function paintCandidateList(elc, editable){
    5. LAP 2 — PLAY FOR THE PIE
 ============================================================ */
 function renderLap2(app){
+  app.appendChild(el(rulesBlock("lap2")));
   const c=el(`<section></section>`);
   // candidate selector
   if(!S.activeCand || !S.candidates.find(x=>x.id===S.activeCand)){
@@ -789,6 +857,7 @@ function advanceLap2(cd){
    6. SYNTHESIS
 ============================================================ */
 function renderSynthesis(app){
+  app.appendChild(el(rulesBlock("synthesis")));
   const winners=S.candidates.filter(c=>c.complete);
   const c=el(`<section></section>`);
   const top=el(`<div class="card pad" style="margin-bottom:16px"></div>`);
