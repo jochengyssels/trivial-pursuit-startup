@@ -7,14 +7,30 @@ const BLOB_URL = `https://jsonblob.com/api/jsonBlob/${REGISTRY_ID}`;
 const WEDGE_KEYS = ["market","pain","ai","why","insight","win"];
 const ROOM_TTL_MS = 12 * 60 * 60 * 1000; // prune rooms older than 12h
 
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+async function withRetry(fn, tries=3){
+  let last;
+  for(let i=0;i<tries;i++){ try{ return await fn(); }catch(e){ last=e; await sleep(180*(i+1)); } }
+  throw last;
+}
 async function getRegistry(){
-  const r = await fetch(BLOB_URL, { headers:{ "Accept":"application/json" } });
-  if(!r.ok) throw new Error("registry read "+r.status);
-  return await r.json();
+  return withRetry(async()=>{
+    const c=new AbortController(); const t=setTimeout(()=>c.abort(),6000);
+    try{
+      const r = await fetch(BLOB_URL, { headers:{ "Accept":"application/json" }, signal:c.signal });
+      if(!r.ok) throw new Error("registry read "+r.status);
+      return await r.json();
+    } finally { clearTimeout(t); }
+  });
 }
 async function putRegistry(reg){
-  const r = await fetch(BLOB_URL, { method:"PUT", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(reg) });
-  if(!r.ok) throw new Error("registry write "+r.status);
+  return withRetry(async()=>{
+    const c=new AbortController(); const t=setTimeout(()=>c.abort(),6000);
+    try{
+      const r = await fetch(BLOB_URL, { method:"PUT", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(reg), signal:c.signal });
+      if(!r.ok) throw new Error("registry write "+r.status);
+    } finally { clearTimeout(t); }
+  });
 }
 function blankRoom(code){
   const r = { code, phase:0, host:null, createdAt:Date.now(), updatedAt:Date.now(),
