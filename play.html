@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TriAmigos Sprint · 30-min idea hunt</title>
+<style>
+  :root{--blue:#1f7ae0;--pink:#e85aa0;--green:#2fab63;--yellow:#f2b705;--brown:#8a5a3c;--orange:#f2792b;
+    --bg:#0e1116;--panel:#171c24;--panel2:#1f2630;--line:#2b3440;--ink:#e9eef5;--muted:#9aa7b6;--good:#2fab63;
+    --font:"Segoe UI",Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:radial-gradient(1100px 520px at 50% -10%,#1b2330,#0e1116 60%);color:var(--ink);min-height:100vh}
+  .wrap{max-width:860px;margin:0 auto;padding:14px 16px 96px}
+  header{display:flex;align-items:center;gap:10px;padding:8px 0 12px;flex-wrap:wrap}
+  header h1{font-size:16px;font-weight:800}
+  header .sub{font-size:12px;color:var(--muted)}
+  .spacer{flex:1}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12px;color:var(--muted);display:flex;gap:7px;align-items:center}
+  .code{font-weight:800;letter-spacing:2px;color:var(--ink)}
+  .langsw{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .langsw button{cursor:pointer;border:none;background:transparent;color:var(--muted);padding:6px 11px;font-size:12px;font-weight:700}
+  .langsw button.on{background:var(--blue);color:#fff}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  h2{font-size:21px;margin-bottom:6px}
+  h3{font-size:15px;margin-bottom:8px}
+  p.muted,.muted{color:var(--muted);font-size:13.5px;line-height:1.5}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:11px 16px;border-radius:12px;font-size:14px;font-weight:700;transition:.15s}
+  .btn:hover{border-color:#3a4654;transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(180deg,#2b6fe0,#1f5ec2);border-color:#2b6fe0;color:#fff}
+  .btn.good{background:linear-gradient(180deg,#34b86c,#249a56);border-color:#2fab63;color:#fff}
+  .btn.sm{padding:7px 12px;font-size:12.5px;border-radius:9px}
+  .btn.ghost{background:transparent}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  input,select{font-family:var(--font);background:#0f141b;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 13px;font-size:15px;width:100%}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .chips{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  .opt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:11px 13px;cursor:pointer;transition:.12s;font-size:14px;line-height:1.35}
+  .opt:hover{border-color:#3a4654}
+  .opt.on{border-color:var(--c);background:linear-gradient(180deg,rgba(255,255,255,.04),transparent);box-shadow:inset 0 0 0 1px var(--c)}
+  .opt .box{width:20px;height:20px;border-radius:6px;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:12px;color:#fff}
+  .opt.on .box{background:var(--c);border-color:var(--c)}
+  .opt .cnt{margin-left:auto;font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap}
+  .opt .ava{display:flex;gap:-4px;margin-left:auto}
+  .wedge-tag{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:13px}
+  .dotc{width:13px;height:13px;border-radius:50%}
+  .players{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .pcard{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
+  .ava{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;color:#08203a}
+  .prog{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+  .ps{font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:5px 10px;border-radius:999px}
+  .ps.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .ps.done{border-color:var(--good);color:var(--good)}
+  .timer{font-variant-numeric:tabular-nums;font-weight:800}
+  .timer.over{color:#e85a5a}
+  .pieWrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .legend{display:flex;flex-direction:column;gap:6px;min-width:200px}
+  .legrow{display:flex;align-items:center;gap:9px;font-size:13px}
+  .legrow .st{margin-left:auto;font-size:11px;color:var(--muted)}
+  .legrow.e .nm{color:#fff;font-weight:700}
+  .statement{font-size:18px;line-height:1.7;background:linear-gradient(180deg,#fdfdfd,#eef1f5);color:#1a2330;border-radius:14px;padding:22px}
+  .statement .b{font-weight:800;padding:1px 5px;border-radius:5px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f141b;border:1px solid var(--line);padding:11px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+  .barwrap{height:6px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:8px}
+  .bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--green))}
+  .waiting{font-size:13px;color:var(--muted);font-style:italic}
+  .footnav{position:fixed;left:0;right:0;bottom:0;background:rgba(14,17,22,.92);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 16px;z-index:50}
+  .footnav .inner{max-width:860px;margin:0 auto;display:flex;justify-content:space-between;gap:10px;align-items:center}
+  a.classic{color:var(--muted);font-size:12px}
+  @media(max-width:560px){.legend{min-width:160px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>⚡ TriAmigos Sprint</h1>
+    <span class="sub">30-min idea hunt</span>
+    <div class="spacer"></div>
+    <div class="pill" id="roomPill" style="display:none">room <span class="code" id="roomCode"></span></div>
+    <div class="pill" id="timerPill" style="display:none">⏱ <span class="timer" id="timer">--:--</span></div>
+    <div class="langsw" id="langsw"><button data-l="en" class="on">EN</button><button data-l="nl">NL</button></div>
+  </header>
+  <div class="prog" id="prog"></div>
+  <main id="app"></main>
+</div>
+<div class="footnav" id="footnav" style="display:none"><div class="inner" id="footinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============== CONTENT (EN/NL) ============== */
+const WEDGES=[
+ {key:"market",c:"#1f7ae0",emoji:"🔵",lens:{en:"Market",nl:"Markt"},q:{en:"Who exactly is this for?",nl:"Voor wie precies?"},
+  opts:[
+   ["m1","10–20p Flemish SMEs with no IT staff (via their accountant)","Vlaamse kmo's (10–20p) zonder IT, via hun boekhouder"],
+   ["m2","Belgian fiduciaires / accounting firms","Belgische fiduciaires / boekhoudkantoren"],
+   ["m3","Independent healthcare practices (dentist/physio)","Zelfstandige zorgpraktijken (tandarts/kiné)"],
+   ["m4","Construction subcontractors in Flanders","Bouw-onderaannemers in Vlaanderen"],
+   ["m5","Horeca groups & hospitality","Horeca-groepen & hospitality"],
+   ["m6","Local webshops / e-commerce","Lokale webshops / e-commerce"],
+   ["m7","Notaries & legal SMEs","Notarissen & juridische kmo's"]]},
+ {key:"pain",c:"#e85aa0",emoji:"🩷",lens:{en:"Pain",nl:"Pijn"},q:{en:"What hurts today?",nl:"Wat doet vandaag pijn?"},
+  opts:[
+   ["p1","Jan-2026 Peppol e-invoicing mandate scramble","Paniek rond de Peppol-verplichting (jan 2026)"],
+   ["p2","Manual VAT/btw reconciliation","Handmatige btw-afstemming"],
+   ["p3","Trilingual (NL/FR/DE) admin overhead","Drietalige (NL/FR/DE) administratielast"],
+   ["p4","Can't hire technical staff (72% can't fill roles)","Geen technici te vinden (72% vacatures onvervuld)"],
+   ["p5","EU AI Act / compliance governance burden","EU AI Act / compliance-last"],
+   ["p6","Chasing late payments / debtors","Achter wanbetalers aanzitten"],
+   ["p7","Quotes/offertes take too long","Offertes maken duurt te lang"]]},
+ {key:"ai",c:"#2fab63",emoji:"🟢",lens:{en:"AI capability",nl:"AI-mogelijkheid"},q:{en:"What can AI now do here?",nl:"Wat kan AI hier nu?"},
+  opts:[
+   ["a1","Read & structure messy invoices/receipts","Rommelige facturen/bonnen lezen & structureren"],
+   ["a2","Auto-translate & draft trilingual docs","Drietalige documenten vertalen & opstellen"],
+   ["a3","Categorize & VAT-code transactions","Transacties categoriseren & btw-coderen"],
+   ["a4","Triage & answer inbound email/support","Inkomende mail/support triëren & beantwoorden"],
+   ["a5","Generate first-draft quotes/contracts","Eerste versie offertes/contracten genereren"],
+   ["a6","Voice notes → structured field data","Spraaknotities → gestructureerde data"],
+   ["a7","Conversational Q&A over their own data","Gesprekken/Q&A over hun eigen data"]]},
+ {key:"why",c:"#f2b705",emoji:"🟡",lens:{en:"Why now",nl:"Waarom nu"},q:{en:"What changed to open the window?",nl:"Wat opende het venster?"},
+  opts:[
+   ["y1","Belgium Peppol mandate live Jan 2026 (hard deadline)","Belgische Peppol-verplichting live jan 2026"],
+   ["y2","EU AI Act obligations land in 2026","EU AI Act-verplichtingen vanaf 2026"],
+   ["y3","LLM cost dropped ~10× in 18 months","LLM-kost ~10× gedaald in 18 maanden"],
+   ["y4","Reliable agents / function-calling now exist","Betrouwbare agents / function-calling bestaan nu"],
+   ["y5","SME labour shortage forces automation","Personeelstekort dwingt automatisering af"],
+   ["y6","GDPR / NIS2 pressure rising","GDPR / NIS2-druk neemt toe"]]},
+ {key:"insight",c:"#8a5a3c",emoji:"🟤",lens:{en:"Unfair insight",nl:"Oneerlijk inzicht"},q:{en:"What do we see that others don't?",nl:"Wat zien wij dat anderen niet zien?"},
+  opts:[
+   ["i1","The accountant — not the SME — is the buyer/channel","De boekhouder, niet de kmo, is de koper/het kanaal"],
+   ["i2","Micro-SME AI adoption stuck ~14% → distribution is the bottleneck","Micro-kmo AI-adoptie ~14% → distributie is de flessenhals"],
+   ["i3","Trilingual Belgian edge-cases are a data moat US players ignore","Drietalige Belgische edge-cases = datavoordeel dat VS negeert"],
+   ["i4","A compliance deadline unlocks budget right now","Een compliance-deadline maakt nú budget vrij"],
+   ["i5","We have direct access to this group via past work","Wij hebben directe toegang via eerder werk"],
+   ["i6","Trust/local presence beats features here","Vertrouwen/lokale aanwezigheid wint van features"]]},
+ {key:"win",c:"#f2792b",emoji:"🟠",lens:{en:"The win",nl:"De overwinning"},q:{en:"How do we distribute & stay ahead?",nl:"Hoe verdelen we & blijven we voor?"},
+  opts:[
+   ["w1","Land whole fiduciaire client-books at once","Hele klantenboeken van fiduciaires in één keer binnenhalen"],
+   ["w2","Proprietary Belgian invoice/VAT dataset compounds","Eigen Belgische factuur/btw-dataset stapelt op"],
+   ["w3","Become the Peppol access point (lock-in)","De Peppol-toegangspoort worden (lock-in)"],
+   ["w4","Integrate into Exact / Yuki / Billit","Integreren in Exact / Yuki / Billit"],
+   ["w5","Network effects across SME + accountant","Netwerkeffecten tussen kmo + boekhouder"],
+   ["w6","Local trust, language & regulatory expertise","Lokaal vertrouwen, taal & regelgevingskennis"]]}
+];
+const WK=WEDGES.reduce((m,w)=>(m[w.key]=w,m),{});
+const PHASES=[
+ {en:"Lobby",nl:"Lobby"},
+ {en:"Diverge",nl:"Divergeren",min:8},
+ {en:"Vote",nl:"Stemmen",min:5},
+ {en:"Pick the idea",nl:"Kies het idee",min:4},
+ {en:"Earn the pie",nl:"Verdien de taart",min:9},
+ {en:"Synthesis",nl:"Synthese",min:2}
+];
+const T={en:{
+   tagline:"Three founders, three phones, 30 minutes, one fundable AI-first idea.",
+   yourName:"Your name",role:"Seat",create:"Create a room",join:"Join room",roomCode:"Room code",
+   share:"Share the room code with your co-founders — everyone opens this page and joins.",
+   inRoom:"in the room",waitingHost:"Waiting for the group to advance…",
+   start:"Start the sprint →",next:"Next →",back:"← Back",
+   divergeH:"Diverge — tick everything that resonates",divergeP:"All three of you work at the same time. Tap every option that fits. Counts show what your co-founders picked. Add your own with “+”.",
+   addOwn:"+ Add your own",pickedBy:"picked",
+   voteH:"Vote — what's hottest?",voteP:"Tap to put a dot on the options worth pursuing. Then build candidate ideas.",
+   build:"Build candidate ideas →",
+   pickH:"Pick the idea to pursue",pickP:"Each of you votes for one. Then lock the winner.",lock:"Lock the winner →",locked:"Winner locked",
+   earnH:"Earn the pie",earnP:"For the chosen idea, pick the best answer per wedge and each vote pass/fail. A wedge turns on at majority pass.",
+   pass:"Pass ✓",fail:"Fail ✕",best:"best",toSyn:"Go to synthesis →",completeFirst:"Earn more wedges first",
+   synH:"Your idea",again:"Play again",
+   stmt:["For ",", who struggle with ",", we use "," — viable now because ",". Unlike others, we see that ",", and we'll win by ","."],
+   chooseRole:"Seat",needName:"Enter your name first.",created:"Room created — share the code!",
+   noPie:"No complete pie yet — keep earning wedges, or that's your signal the idea has a real gap."},
+ nl:{
+   tagline:"Drie oprichters, drie telefoons, 30 minuten, één financierbaar AI-first idee.",
+   yourName:"Je naam",role:"Rol",create:"Maak een room",join:"Join room",roomCode:"Roomcode",
+   share:"Deel de roomcode met je medeoprichters — iedereen opent deze pagina en joint.",
+   inRoom:"in de room",waitingHost:"Wachten tot de groep verdergaat…",
+   start:"Start de sprint →",next:"Volgende →",back:"← Terug",
+   divergeH:"Divergeren — vink alles aan wat resoneert",divergeP:"Jullie drie werken tegelijk. Tik elke optie aan die past. De tellers tonen wat je medeoprichters kozen. Voeg eigen ideeën toe met “+”.",
+   addOwn:"+ Eigen idee",pickedBy:"gekozen",
+   voteH:"Stemmen — wat is het heetst?",voteP:"Tik om een stip te zetten op de opties die het waard zijn. Bouw daarna kandidaat-ideeën.",
+   build:"Bouw kandidaat-ideeën →",
+   pickH:"Kies het idee om te bespelen",pickP:"Elk stemt op één. Vergrendel daarna de winnaar.",lock:"Vergrendel de winnaar →",locked:"Winnaar vergrendeld",
+   earnH:"Verdien de taart",earnP:"Kies voor het gekozen idee het beste antwoord per taartpunt en stem pass/fail. Een taartpunt licht op bij meerderheid pass.",
+   pass:"Pass ✓",fail:"Fail ✕",best:"beste",toSyn:"Naar synthese →",completeFirst:"Verdien eerst meer taartpunten",
+   synH:"Jullie idee",again:"Opnieuw spelen",
+   stmt:["Voor ",", die worstelen met ",", gebruiken we "," — nu haalbaar omdat ",". Anders dan anderen zien wij dat ",", en we winnen door ","."],
+   chooseRole:"Rol",needName:"Vul eerst je naam in.",created:"Room aangemaakt — deel de code!",
+   noPie:"Nog geen volledige taart — verdien meer taartpunten, of dat is je signaal dat het idee een echte leemte heeft."}
+};
+
+/* ============== IDENTITY + STATE ============== */
+const API="/api/room";
+let LANG=localStorage.getItem("tri_lang")||"en";
+let ME={pid:localStorage.getItem("tri_pid")||("u_"+Math.random().toString(36).slice(2,9)),
+        name:localStorage.getItem("tri_name")||"",role:localStorage.getItem("tri_role")||"CEO"};
+localStorage.setItem("tri_pid",ME.pid);
+let CODE=(location.hash.replace("#","").toUpperCase())||"";
+let state=null, joined=false, pollTimer=null;
+const tt=s=>T[LANG][s];
+
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
+async function api(method,body){
+  const url = method==="GET" ? `${API}?code=${encodeURIComponent(CODE)}` : API;
+  const opt = {method,headers:{"Content-Type":"application/json"}};
+  if(method!=="GET") opt.body=JSON.stringify(body);
+  const r=await fetch(url,opt); return await r.json();
+}
+async function op(o){ try{ const r=await api("POST",{code:CODE,op:Object.assign({pid:ME.pid},o)}); if(r&&r.ok){ state=r.state; render(); } }catch(e){ toast("Sync hiccup — retrying"); } }
+async function pull(){ if(!CODE) return; try{ const r=await api("GET"); if(r&&r.ok){ state=r.state; if(!joined && state.players[ME.pid]) joined=true; render(); } }catch(e){} }
+function startPolling(){ clearInterval(pollTimer); pollTimer=setInterval(()=>{ pull(); op({type:"ping"}); }, 2300); }
+
+/* ============== TIMER (local guidance) ============== */
+let phaseStart=0, lastPhase=-1;
+function paintTimer(){
+  const ph=state?state.phase:0; const min=PHASES[ph]&&PHASES[ph].min;
+  const pill=document.getElementById("timerPill");
+  if(!min){ pill.style.display="none"; return; }
+  pill.style.display="flex";
+  if(ph!==lastPhase){ phaseStart=Date.now(); lastPhase=ph; }
+  const left=Math.round(min*60-(Date.now()-phaseStart)/1000);
+  const el=document.getElementById("timer"); const a=Math.abs(left);
+  el.textContent=(left<0?"+":"")+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0");
+  el.className="timer"+(left<0?" over":"");
+}
+setInterval(paintTimer,1000);
+
+/* ============== HELPERS ============== */
+function lbl(wedge,id){ const w=WK[wedge]; const o=w.opts.find(x=>x[0]===id); if(o) return LANG==="nl"?o[2]:o[1];
+  const c=(state.customs&&state.customs[wedge]||[]).find(x=>x.id===id); return c?c.text:id; }
+function color(i){const cs=["#1f7ae0","#e85aa0","#2fab63","#f2b705","#8a5a3c","#f2792b","#5ad1c4","#c77dff"];return cs[i%cs.length];}
+function initials(n){return (n||"?").trim().slice(0,2).toUpperCase();}
+function players(){return state?Object.entries(state.players||{}):[];}
+function pColor(pid){const idx=players().findIndex(([id])=>id===pid);return color(idx<0?0:idx);}
+
+/* ============== PIE ============== */
+function piePath(cx,cy,r,a,b){const A=(a-90)*Math.PI/180,B=(b-90)*Math.PI/180;
+  return `M${cx},${cy} L${cx+r*Math.cos(A)},${cy+r*Math.sin(A)} A${r},${r} 0 0 1 ${cx+r*Math.cos(B)},${cy+r*Math.sin(B)} Z`;}
+function pieSvg(size){
+  const cx=size/2,cy=size/2,r=size/2-3;let h="";
+  WEDGES.forEach((w,i)=>{const e=state.lap2&&state.lap2[w.key]&&state.lap2[w.key].earned;
+    h+=`<path d="${piePath(cx,cy,r,i*60,(i+1)*60)}" fill="${e?w.c:'#222b36'}" stroke="#0e1116" stroke-width="2" style="${e?'':'opacity:.5'}"/>`;});
+  h+=`<circle cx="${cx}" cy="${cy}" r="${size*0.1}" fill="#0e1116" stroke="#2b3440" stroke-width="2"/>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${h}</svg>`;
+}
+
+/* ============== RENDER ============== */
+function render(){
+  document.querySelectorAll("#langsw button").forEach(b=>b.classList.toggle("on",b.dataset.l===LANG));
+  // room + progress chrome
+  const rp=document.getElementById("roomPill");
+  if(CODE){ rp.style.display="flex"; document.getElementById("roomCode").textContent=CODE; } else rp.style.display="none";
+  const prog=document.getElementById("prog");
+  if(state && joined){
+    prog.style.display="flex";
+    prog.innerHTML=PHASES.map((p,i)=>`<span class="ps ${i===state.phase?'on':''} ${i<state.phase?'done':''}">${i+1}. ${p[LANG]}${p.min?' · '+p.min+'m':''}</span>`).join("");
+  } else prog.style.display="none";
+  paintTimer();
+
+  const app=document.getElementById("app");
+  if(!joined || !state){ app.innerHTML=""; app.appendChild(lobbyJoin()); document.getElementById("footnav").style.display="none"; return; }
+  ({0:rLobby,1:rDiverge,2:rVote,3:rPick,4:rEarn,5:rSyn}[state.phase]||rLobby)(app);
+  renderFoot();
+}
+function el(h){const t=document.createElement("template");t.innerHTML=h.trim();return t.content.firstChild;}
+
+/* ---- join screen ---- */
+function lobbyJoin(){
+  const c=el(`<section class="card"></section>`);
+  c.innerHTML=`
+    <h2>⚡ TriAmigos Sprint</h2>
+    <p class="muted">${tt("tagline")}</p>
+    <div style="height:14px"></div>
+    <label class="muted" style="font-weight:700">${tt("yourName")}</label>
+    <input id="nm" placeholder="${tt("yourName")}" value="${(ME.name||"").replace(/"/g,'&quot;')}" style="margin:6px 0 12px"/>
+    <label class="muted" style="font-weight:700">${tt("role")}</label>
+    <select id="rl" style="margin:6px 0 14px">${["CEO","CTO","CCO"].map(r=>`<option ${ME.role===r?'selected':''}>${r}</option>`).join("")}</select>
+    <div class="row" style="align-items:flex-end">
+      <div style="flex:1;min-width:160px">
+        <label class="muted" style="font-weight:700">${tt("roomCode")}</label>
+        <input id="cd" placeholder="ABCD" value="${CODE}" maxlength="6" style="margin-top:6px;text-transform:uppercase;letter-spacing:2px;font-weight:800"/>
+      </div>
+      <button class="btn" id="joinBtn">${tt("join")}</button>
+    </div>
+    <div style="text-align:center;margin:14px 0;color:var(--muted);font-size:12px">— or —</div>
+    <button class="btn primary" id="createBtn" style="width:100%">${tt("create")}</button>
+    <p class="muted" style="margin-top:14px">${tt("share")}</p>
+    <p style="margin-top:10px"><a class="classic" href="game">Prefer the 90-min single-screen version? Open the classic game →</a></p>`;
+  const save=()=>{ME.name=c.querySelector("#nm").value.trim();ME.role=c.querySelector("#rl").value;
+    localStorage.setItem("tri_name",ME.name);localStorage.setItem("tri_role",ME.role);};
+  c.querySelector("#createBtn").onclick=async()=>{save(); if(!ME.name){toast(tt("needName"));return;}
+    CODE=Array.from({length:4},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random()*32)]).join("");
+    location.hash=CODE; await op({type:"join",name:ME.name,role:ME.role}); joined=true; startPolling(); toast(tt("created")); render();};
+  c.querySelector("#joinBtn").onclick=async()=>{save(); if(!ME.name){toast(tt("needName"));return;}
+    const v=c.querySelector("#cd").value.trim().toUpperCase(); if(!v){toast(tt("roomCode"));return;}
+    CODE=v; location.hash=CODE; await op({type:"join",name:ME.name,role:ME.role}); joined=true; startPolling(); render();};
+  return c;
+}
+
+/* ---- phase 0: lobby (in room) ---- */
+function rLobby(app){
+  app.innerHTML="";
+  const c=el(`<section class="card"></section>`);
+  c.innerHTML=`<div class="between"><h2>Lobby</h2><span class="pill">room <span class="code">${CODE}</span></span></div>
+    <p class="muted">${tt("share")}</p>
+    <h3 style="margin-top:14px">${players().length} ${tt("inRoom")}</h3>
+    <div class="players" id="pl"></div>`;
+  c.querySelector("#pl").innerHTML=players().map(([id,p])=>`<span class="pcard"><span class="ava" style="background:${pColor(id)}">${initials(p.name)}</span>${p.name} · ${p.role||""}</span>`).join("");
+  app.appendChild(c);
+}
+
+/* ---- phase 1: diverge (multiple choice, parallel) ---- */
+function rDiverge(app){
+  app.innerHTML="";
+  const intro=el(`<section class="card"></section>`);
+  intro.innerHTML=`<h2>${tt("divergeH")}</h2><p class="muted">${tt("divergeP")}</p>`;
+  app.appendChild(intro);
+  WEDGES.forEach(w=>{
+    const card=el(`<section class="card"></section>`);
+    card.innerHTML=`<div class="wedge-tag"><span class="dotc" style="background:${w.c}"></span>${w.emoji} ${w.lens[LANG]} <span class="muted" style="font-weight:400">— ${w.q[LANG]}</span></div><div class="chips"></div>`;
+    const chips=card.querySelector(".chips");
+    const allOpts=[...w.opts.map(o=>[o[0], LANG==="nl"?o[2]:o[1]]), ...((state.customs[w.key]||[]).map(cu=>[cu.id,cu.text]))];
+    allOpts.forEach(([id,text])=>{
+      const pk=(state.picks[w.key]&&state.picks[w.key][id])||[];
+      const mine=pk.includes(ME.pid);
+      const o=el(`<div class="opt ${mine?'on':''}" style="--c:${w.c}"><span class="box">${mine?'✓':''}</span><span>${escapeHtml(text)}</span>${pk.length?`<span class="cnt">${pk.length} ${tt("pickedBy")}</span>`:''}</div>`);
+      o.onclick=()=>op({type:"togglePick",wedge:w.key,optionId:id});
+      chips.appendChild(o);
+    });
+    const add=el(`<div class="opt" style="--c:${w.c};justify-content:center;color:var(--muted)">${tt("addOwn")}</div>`);
+    add.onclick=()=>{const t=prompt(w.lens[LANG]+" — "+tt("addOwn"));if(t&&t.trim())op({type:"addCustom",wedge:w.key,text:t.trim()});};
+    chips.appendChild(add);
+    app.appendChild(card);
+  });
+}
+
+/* ---- phase 2: vote ---- */
+function rVote(app){
+  app.innerHTML="";
+  const intro=el(`<section class="card"></section>`);
+  intro.innerHTML=`<h2>${tt("voteH")}</h2><p class="muted">${tt("voteP")}</p>`;
+  app.appendChild(intro);
+  WEDGES.forEach(w=>{
+    const ids=Object.keys(state.picks[w.key]||{});
+    if(!ids.length) return;
+    const card=el(`<section class="card"></section>`);
+    card.innerHTML=`<div class="wedge-tag"><span class="dotc" style="background:${w.c}"></span>${w.emoji} ${w.lens[LANG]}</div><div class="chips"></div>`;
+    const chips=card.querySelector(".chips");
+    ids.sort((a,b)=>((state.votes[w.key+"|"+b]||[]).length)-((state.votes[w.key+"|"+a]||[]).length));
+    ids.forEach(id=>{
+      const key=w.key+"|"+id; const v=state.votes[key]||[]; const mine=v.includes(ME.pid);
+      const o=el(`<div class="opt ${mine?'on':''}" style="--c:${w.c}"><span class="box">${mine?'●':''}</span><span>${escapeHtml(lbl(w.key,id))}</span>${v.length?`<span class="cnt">●×${v.length}</span>`:''}</div>`);
+      o.onclick=()=>op({type:"vote",itemKey:key});
+      chips.appendChild(o);
+    });
+    app.appendChild(card);
+  });
+}
+
+/* ---- phase 3: pick candidate ---- */
+function buildCandidates(){
+  const score=(w,id)=>((state.picks[w][id]||[]).length)+((state.votes[w+"|"+id]||[]).length);
+  const top=(w,n)=>Object.keys(state.picks[w]||{}).sort((a,b)=>score(w,b)-score(w,a)).slice(0,n);
+  const mk=top("market",2), pn=top("pain",2);
+  const combos=[]; const seen=new Set();
+  [[0,0],[0,1],[1,0]].forEach(([i,j])=>{ if(mk[i]&&pn[j]){const k=mk[i]+"+"+pn[j]; if(!seen.has(k)){seen.add(k);
+    combos.push({id:"k_"+mk[i]+"_"+pn[j], marketKey:mk[i], painKey:pn[j],
+      name:lbl("market",mk[i])+"  ✕  "+lbl("pain",pn[j])});}}});
+  if(!combos.length){toast("Vote on a Market and a Pain first");return;}
+  op({type:"setCandidates",candidates:combos});
+}
+function rPick(app){
+  app.innerHTML="";
+  const c=el(`<section class="card"></section>`);
+  c.innerHTML=`<h2>${tt("pickH")}</h2><p class="muted">${tt("pickP")}</p>`;
+  app.appendChild(c);
+  if(!state.candidates.length){
+    const b=el(`<section class="card" style="text-align:center"><button class="btn primary" id="bld">${tt("build")}</button></section>`);
+    b.querySelector("#bld").onclick=buildCandidates; app.appendChild(b); return;
+  }
+  const list=el(`<section class="card"><div class="chips" id="cl"></div></section>`);
+  const cl=list.querySelector("#cl");
+  state.candidates.forEach(cd=>{
+    const v=state.candVotes[cd.id]||[]; const mine=v.includes(ME.pid); const chosen=state.chosenCand===cd.id;
+    const o=el(`<div class="opt ${mine?'on':''}" style="--c:#2b6fe0;${chosen?'box-shadow:inset 0 0 0 2px var(--good)':''}">
+      <span class="box">${mine?'●':''}</span><span><b>${escapeHtml(cd.name)}</b></span>
+      <span class="cnt">${v.map(pid=>`<span class="ava" style="display:inline-grid;width:18px;height:18px;background:${pColor(pid)}">${initials(state.players[pid]?state.players[pid].name:'?')}</span>`).join(" ")||""}</span></div>`);
+    o.onclick=()=>op({type:"candVote",candId:cd.id}); cl.appendChild(o);
+  });
+  app.appendChild(list);
+  const lockRow=el(`<section class="card" style="text-align:center"></section>`);
+  const top=[...state.candidates].sort((a,b)=>((state.candVotes[b.id]||[]).length)-((state.candVotes[a.id]||[]).length))[0];
+  lockRow.innerHTML=`<button class="btn good" id="lock">${tt("lock")}</button>${state.chosenCand?`<div class="muted" style="margin-top:8px">✓ ${tt("locked")}</div>`:""}`;
+  lockRow.querySelector("#lock").onclick=()=>{ if(top) op({type:"chooseCand",candId:top.id}); };
+  app.appendChild(lockRow);
+}
+
+/* ---- phase 4: earn the pie ---- */
+function rEarn(app){
+  app.innerHTML="";
+  const cand=(state.candidates||[]).find(c=>c.id===state.chosenCand)||state.candidates[0];
+  const head=el(`<section class="card"></section>`);
+  head.innerHTML=`<h2>${tt("earnH")}</h2><p class="muted">${tt("earnP")}</p>
+    ${cand?`<div style="margin-top:8px;font-weight:800;font-size:16px">🎯 ${escapeHtml(cand.name)}</div>`:""}
+    <div class="pieWrap" style="margin-top:14px"><div id="pie"></div></div>`;
+  app.appendChild(head);
+  head.querySelector("#pie").innerHTML=pieSvg(160);
+
+  WEDGES.forEach(w=>{
+    const L=state.lap2[w.key]||{best:null,pass:[],fail:[],earned:false};
+    const card=el(`<section class="card"></section>`);
+    // candidate-relevant prefilled: market/pain locked from chosen idea
+    let lockId=null; if(cand && w.key==="market") lockId=cand.marketKey; if(cand && w.key==="pain") lockId=cand.painKey;
+    card.innerHTML=`<div class="between"><div class="wedge-tag"><span class="dotc" style="background:${w.c}"></span>${w.emoji} ${w.lens[LANG]}</div>
+      <span class="cnt muted" style="font-size:12px">✓ ${(L.pass||[]).length} · ✕ ${(L.fail||[]).length} ${L.earned?'· <b style="color:'+w.c+'">EARNED</b>':''}</span></div>
+      <div class="chips" style="margin-top:8px"></div>
+      <div class="row" style="margin-top:10px"><button class="btn sm good pf" data-v="pass">${tt("pass")}</button><button class="btn sm pf" data-v="fail" style="border-color:#5a2b2b;color:#ff9d9d">${tt("fail")}</button></div>`;
+    const chips=card.querySelector(".chips");
+    const ids = lockId ? [lockId] : (Object.keys(state.picks[w.key]||{}).length? Object.keys(state.picks[w.key]) : w.opts.map(o=>o[0]));
+    // sort by votes
+    ids.sort((a,b)=>((state.votes[w.key+"|"+b]||[]).length)-((state.votes[w.key+"|"+a]||[]).length));
+    ids.forEach(id=>{
+      const sel=L.best===id || (lockId&&!L.best&&id===lockId);
+      const o=el(`<div class="opt ${sel?'on':''}" style="--c:${w.c}"><span class="box">${sel?'✓':''}</span><span>${escapeHtml(lbl(w.key,id))}</span></div>`);
+      o.onclick=()=>op({type:"setBest",wedge:w.key,optionId:id}); chips.appendChild(o);
+    });
+    card.querySelectorAll(".pf").forEach(b=>b.onclick=()=>{
+      const mine=(b.dataset.v==="pass"?L.pass:L.fail)||[];
+      op({type:"passFail",wedge:w.key,val: mine.includes(ME.pid)?"none":b.dataset.v});
+    });
+    app.appendChild(card);
+  });
+}
+
+/* ---- phase 5: synthesis ---- */
+function rSyn(app){
+  app.innerHTML="";
+  const cand=(state.candidates||[]).find(c=>c.id===state.chosenCand)||state.candidates[0];
+  const earned=WEDGES.filter(w=>state.lap2[w.key]&&state.lap2[w.key].earned);
+  const c=el(`<section class="card"></section>`);
+  c.innerHTML=`<div class="between"><h2>🥧 ${tt("synH")}</h2><div>${pieSvg(64)}</div></div>`;
+  app.appendChild(c);
+  const best=k=>{const L=state.lap2[k]; let id=L&&L.best; if(!id&&cand){if(k==="market")id=cand.marketKey;if(k==="pain")id=cand.painKey;} return id?escapeHtml(lbl(k,id)):"…";};
+  const S=tt("stmt");
+  const stmt=el(`<section class="card"><div class="statement">
+     ${S[0]}<span class="b" style="background:#cfe4ff">${best("market")}</span>${S[1]}<span class="b" style="background:#ffd4ea">${best("pain")}</span>${S[2]}<span class="b" style="background:#cdf0d9">${best("ai")}</span>${S[3]}<span class="b" style="background:#ffeeb0">${best("why")}</span>${S[4]}<span class="b" style="background:#e8d2c2">${best("insight")}</span>${S[5]}<span class="b" style="background:#ffd9bf">${best("win")}</span>${S[6]}
+     </div></section>`);
+  app.appendChild(stmt);
+  if(earned.length<6){ const n=el(`<section class="card"><p class="muted">${tt("noPie")}</p></section>`); app.appendChild(n); }
+}
+
+/* ---- footer nav (collaborative: anyone can advance) ---- */
+function renderFoot(){
+  const fn=document.getElementById("footnav"), fi=document.getElementById("footinner");
+  fn.style.display="block";
+  const ph=state.phase;
+  let left = ph>0 ? `<button class="btn ghost sm" id="back">${tt("back")}</button>` : `<span class="muted" style="font-size:12px">room ${CODE}</span>`;
+  let right="";
+  if(ph===0) right=`<button class="btn primary" id="next">${tt("start")}</button>`;
+  else if(ph===1) right=`<button class="btn primary" id="next">${tt("next")}</button>`;
+  else if(ph===2) right=`<button class="btn primary" id="next">${tt("build")}</button>`;
+  else if(ph===3) right=`<button class="btn primary" id="next" ${state.chosenCand?'':'disabled'}>${tt("next")}</button>`;
+  else if(ph===4){ const all=WEDGES.every(w=>state.lap2[w.key]&&state.lap2[w.key].earned);
+    right=`<button class="btn primary" id="next">${tt("toSyn")}</button>`; }
+  else if(ph===5) right=`<button class="btn good" id="again">${tt("again")}</button>`;
+  fi.innerHTML=`<div>${left}</div><div class="row">${right}</div>`;
+  const back=fi.querySelector("#back"); if(back) back.onclick=()=>op({type:"setPhase",phase:ph-1});
+  const next=fi.querySelector("#next"); if(next) next.onclick=()=>{
+    if(ph===2){ buildCandidates(); op({type:"setPhase",phase:3}); }
+    else op({type:"setPhase",phase:ph+1});
+  };
+  const again=fi.querySelector("#again"); if(again) again.onclick=()=>op({type:"reset"});
+}
+
+function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+
+/* ============== BOOT ============== */
+document.querySelectorAll("#langsw button").forEach(b=>b.onclick=()=>{LANG=b.dataset.l;localStorage.setItem("tri_lang",LANG);render();});
+if(CODE){ // returning via shared link
+  pull().then(()=>{ if(state){ startPolling(); } render(); });
+}
+render();
+</script>
+</body>
+</html>
